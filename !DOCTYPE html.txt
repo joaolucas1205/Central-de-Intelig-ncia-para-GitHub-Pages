@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Central de Inteligência PRO - joaolucaswebsite</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        :root {
+            --electric-blue: #007BFF;
+            --dark-blue: #0056b3;
+            --color-meta: #1877F2;
+            --color-google: #4285F4;
+            --color-tiktok: #000000;
+            --color-erros: #e74c3c;
+            --color-ebook: #8e44ad;
+            --color-dashboard: #2c3e50;
+            --color-builder: #1e293b;
+            --color-background: #f0f2f5;
+            --color-light: #ffffff;
+            --color-text-light: #cbd5e1;
+            --color-text-dark: #334155;
+            --color-border: #e2e8f0;
+            --shadow: 0 5px 15px rgba(0,0,0,0.05);
+            --shadow-hover: 0 12px 25px rgba(0,0,0,0.1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-background);
+            color: var(--color-text-dark);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            padding: 1.5rem;
+            box-sizing: border-box;
+        }
+
+        .dashboard-container { width: 100%; max-width: 1920px; text-align: center; }
+        .dashboard-title { font-size: 2.5rem; font-weight: 700; color: var(--color-dark); }
+        .dashboard-subtitle { font-size: 1.1rem; color: var(--color-text-dark); margin-bottom: 20px; max-width: 750px; margin: 0 auto 20px auto; }
+        .notification-bar { background-color: #fffbeB; color: #b45309; padding: 12px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #fde68a; font-size: 0.9rem; text-align: center; animation: fadeIn 0.5s ease-out; }
+        
+        .main-layout { display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 25px; align-items: flex-start; }
+        .main-layout > * { animation: fadeIn 0.5s ease-out forwards; opacity: 0; }
+        .modules-column { display: flex; flex-direction: column; gap: 25px; }
+
+        .module {
+            background: var(--color-light); border-radius: 12px; box-shadow: var(--shadow);
+            text-align: left; border-left: 4px solid;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            width: 100%; box-sizing: border-box;
+        }
+        .module:hover { transform: translateY(-5px); box-shadow: var(--shadow-hover); }
+        .module-header { display: flex; align-items: center; justify-content: space-between; padding: 18px; cursor: pointer; }
+        .header-title { display: flex; align-items: center; gap: 12px; }
+        .header-title .icon { width: 22px; height: 22px; }
+        .header-title h3 { margin: 0; font-size: 1.1rem; font-weight: 600; }
+        .toggle-icon { font-size: 1.5rem; font-weight: bold; transition: transform 0.3s ease; }
+        .module.collapsed .toggle-icon { transform: rotate(-90deg); }
+        
+        #mod-gemini { border-color: #8f94fb; } #mod-gemini h3 { color: #8f94fb; }
+        #mod-erros { border-color: var(--color-erros); } #mod-erros h3 { color: var(--color-erros); }
+        #mod-ebook { border-color: var(--color-ebook); } #mod-ebook h3 { color: var(--color-ebook); }
+        #mod-dashboard { border-color: var(--color-dashboard); } #mod-dashboard h3 { color: var(--color-dashboard); }
+        
+        .module-content { padding: 0 20px 20px 20px; border-top: 1px solid var(--color-border); max-height: 1200px; overflow-y: auto; transition: max-height 0.7s ease-in-out, padding 0.5s ease, border 0.5s; }
+        .module.collapsed .module-content { max-height: 0; padding: 0 20px; border-top-color: transparent; }
+        .module-content h4 { margin: 15px 0 10px; font-weight: 600; color: var(--color-dark); font-size: 1rem; }
+        .module-content p, .module-content ul { font-size: 0.9rem; line-height: 1.7; margin: 0; }
+        .module-content ul { padding-left: 20px; list-style-type: '✓ '; color: var(--electric-blue) }
+        .module-content li { margin-bottom: 8px; padding-left: 5px; color: var(--color-text-dark); }
+        
+        .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .kpi-card { background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border-bottom: 3px solid var(--electric-blue); }
+        .kpi-card label { font-size: 0.85rem; font-weight: 500; display: block; }
+        .kpi-card .value { font-size: 1.5rem; font-weight: 700; color: var(--color-dark); }
+        .chart-container { margin-top: 20px; }
+        .chart-bar { background-color: var(--electric-blue); margin: 0 auto 5px auto; border-radius: 4px; transition: width 0.5s ease-out; }
+        .chart-bar-label { font-size: 0.8rem; text-align: center; }
+        .reminders ul { list-style-type: '🔔 '; color: var(--color-dashboard); }
+
+        #planner-main { background: var(--color-builder); color: var(--color-light); border-radius: 16px; border-left: none; border-top: 4px solid var(--electric-blue); }
+        #planner-main h3, #planner-main .icon { color: var(--color-light); }
+        #planner-main h4 { color: var(--electric-blue); margin-top: 25px; border-bottom: 1px solid #334155; padding-bottom: 5px; font-size: 1.1rem; }
+        .planner-block { margin-bottom: 20px; position: relative; }
+        .planner-block label { display: block; font-weight: 500; font-size: 0.9rem; margin-bottom: 8px; color: #cbd5e1; }
+        .planner-input, .planner-select {
+            width: 100%; background-color: #334155; border: 1px solid #475569;
+            border-radius: 8px; padding: 12px; color: var(--color-light);
+            font-size: 1rem; box-sizing: border-box;
+        }
+        .planner-input:focus, .planner-select:focus { outline: none; border-color: var(--electric-blue); box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.4); }
+
+        .gemini-btn {
+            background: var(--gemini); color: white; border: none;
+            border-radius: 6px; padding: 4px 8px; font-size: 0.8rem;
+            font-weight: 600; cursor: pointer; display: inline-flex;
+            align-items: center; gap: 5px; transition: all 0.2s ease;
+        }
+        .gemini-btn:hover { opacity: 0.9; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        .gemini-input-wrapper { display: flex; gap: 10px; }
+        #persona-output { margin-top: 15px; background: #eef2f7; padding: 15px; border-radius: 8px; display: none; }
+        .loading-spinner {
+            width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite;
+        }
+        .gemini-btn-block { position: absolute; right: 10px; top: 38px; }
+
+        .form-btn {
+            width: 100%; text-align: center; padding: 14px; border-radius: 8px; border: none;
+            font-weight: 600; font-size: 1rem; text-decoration: none; color: white; display: flex; align-items: center; justify-content: center; gap: 10px;
+            transition: all 0.2s ease; cursor: pointer;
+        }
+        .form-btn.whatsapp { background-color: #25d366; }
+        .form-btn.email { background-color: var(--electric-blue); }
+        .form-btn.ebook { background-color: var(--color-ebook); }
+        .form-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        .calc-tabs { display: flex; gap: 10px; margin-bottom: 15px; }
+        .calc-tab { flex: 1; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600; text-align: center; border: 2px solid var(--color-border); transition: all 0.2s ease; }
+        .calc-tab.active { color: white; transform: translateY(-2px); }
+        #tab-meta.active { background: var(--color-meta); border-color: var(--color-meta); }
+        #tab-google.active { background: var(--color-google); border-color: var(--color-google); }
+        #tab-tiktok.active { background: #000; border-color: #000; }
+        .calculator-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;}
+        .calc-output-block { background: #f8f9fa; padding: 10px; border-radius: 8px; text-align: center; }
+        .calc-output-block label { font-size: 0.8rem; font-weight: 500; display: block; }
+        .calc-output-block .value { font-size: 1.3rem; font-weight: 700; color: var(--electric-blue); }
+        input[type="range"] { width: 100%; }
+        #calc-note { font-size: 0.75rem; text-align: center; margin-top: 15px; color: #64748b; }
+
+        @media (max-width: 1200px) { .main-layout { grid-template-columns: 1fr 1fr; } .planner-column, .dashboard-column { grid-column: 1 / 3; } }
+        @media (max-width: 768px) { body { padding: 1rem; } .dashboard-title { font-size: 1.8rem; } .dashboard-subtitle { font-size: 1rem; } .main-layout { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <h1 class="dashboard-title">Central de Inteligência PRO</h1>
+        <p class="dashboard-subtitle">A sua plataforma completa para planear, simular e criar campanhas de marketing com resultados. Agora com o poder da IA da Google.</p>
+        <div class="notification-bar">
+            <strong>✨ NOVIDADE:</strong> Use o poder da IA para gerar personas e criativos de anúncios em segundos! Procure pelo botão ✨.
+        </div>
+
+        <div class="main-layout">
+            
+            <!-- COLUNA 1: FUNDAMENTOS E IA -->
+            <div class="modules-column">
+                <div class="module" id="mod-gemini">
+                    <div class="module-header"><div class="header-title"><h3>✨ Gerador de Persona com IA</h3></div></div>
+                    <div class="module-content">
+                        <h4>Descreva o seu Negócio</h4>
+                        <p style="font-size: 0.85rem; margin-bottom: 10px;">Diga o que vende e a IA criará um perfil de cliente ideal para si.</p>
+                        <div class="gemini-input-wrapper">
+                            <input type="text" id="business-desc" class="planner-input" placeholder="Ex: Vendo café especial online para todo o Brasil" style="background-color: white; color: var(--color-text-dark);">
+                            <button id="generate-persona-btn" class="gemini-btn" style="padding: 10px 15px;">Gerar</button>
+                        </div>
+                        <div id="persona-output"></div>
+                    </div>
+                </div>
+
+                <div class="module" id="mod-erros">
+                    <div class="module-header"><div class="header-title"><h3 style="color:var(--color-erros)">Não Cometa Erros</h3></div><div class="toggle-icon">↓</div></div>
+                    <div class="module-content"><h4>Erros Comuns que Custam Caro:</h4><ul><li><strong>Falar do produto, não da solução:</strong> Foque no benefício!</li><li><strong>Promessa Vaga ou Exagerada:</strong> Seja concreto e credível.</li><li><strong>Ignorar a Jornada do Cliente:</strong> Atraia, nutra e só então venda.</li></ul></div>
+                </div>
+                 <div class="module" id="mod-ebook">
+                    <div class="module-header"><div class="header-title"><h3 style="color:var(--color-ebook)">Ebook Gratuito</h3></div><div class="toggle-icon">↓</div></div>
+                    <div class="module-content">
+                        <h4>5 Nichos Lucrativos na Gringa (para o Brasil)</h4>
+                        <ul>
+                            <li>Produtos sustentáveis e Eco-friendly</li>
+                            <li>Acessórios e gadgets para Home Office</li>
+                            <li>Soluções de Saúde Mental e Bem-estar Digital</li>
+                        </ul>
+                        <div class="planner-block" style="margin-top: 10px;">
+                            <label>O seu melhor email para receber:</label>
+                            <input type="email" id="ebook-email" class="planner-input" placeholder="seu.email@dominio.com" style="background-color: white; color: var(--color-text-dark);">
+                        </div>
+                        <button id="get-ebook" class="form-btn ebook">Baixar Agora</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLUNA 2: DASHBOARD CENTRAL -->
+            <div class="modules-column dashboard-column">
+                <div class="module" id="mod-dashboard">
+                    <div class="module-header"><div class="header-title"><h3>Dashboard de Performance</h3></div></div>
+                    <div class="module-content">
+                        <h4>Indicadores-Chave (KPIs)</h4>
+                        <div class="kpi-grid">
+                            <div class="kpi-card"><label>Campanhas Ativas</label><div class="value">3</div></div>
+                            <div class="kpi-card"><label>Investimento Total</label><div class="value" id="kpi-investment">1,500€</div></div>
+                            <div class="kpi-card"><label>Leads Geradas</label><div class="value" id="kpi-leads">45</div></div>
+                            <div class="kpi-card"><label>Custo por Lead (CPL)</label><div class="value" id="kpi-cpl">33€</div></div>
+                        </div>
+                        <h4>Performance Mensal (Leads)</h4>
+                        <div class="chart-container">
+                             <div><div class="chart-bar" style="width: 40%; height: 20px;"></div><p class="chart-bar-label">Semana 1: 8 Leads</p></div>
+                             <div style="margin-top:10px;"><div class="chart-bar" style="width: 60%; height: 20px;"></div><p class="chart-bar-label">Semana 2: 12 Leads</p></div>
+                             <div style="margin-top:10px;"><div class="chart-bar" style="width: 75%; height: 20px;"></div><p class="chart-bar-label">Semana 4: 15 Leads</p></div>
+                        </div>
+                        <h4>Lembretes Estratégicos</h4>
+                        <div class="reminders">
+                            <ul><li>Otimizar público da campanha de Meta</li><li>Planear próximo conteúdo para TikTok</li></ul>
+                        </div>
+                    </div>
+                </div>
+                 <div class="module" id="mod-calc">
+                    <div class="module-header"><div class="header-title"><h3>Calculadora de Projeção</h3></div><div class="toggle-icon">↓</div></div>
+                    <div class="module-content">
+                        <div class="calc-tabs">
+                            <div class="calc-tab active" id="tab-meta" data-platform="meta">Meta</div>
+                            <div class="calc-tab" id="tab-google" data-platform="google">Google</div>
+                            <div class="calc-tab" id="tab-tiktok" data-platform="tiktok">TikTok</div>
+                        </div>
+                        <div class="calc-input-block">
+                            <label for="investment">Investimento Diário: <strong id="investment-value" style="color: var(--electric-blue);">50.00€</strong></label>
+                            <input type="range" id="investment" min="10" max="2000" value="50" step="10">
+                        </div>
+                        <p id="calc-note">Estimativa baseada em médias de mercado. Os resultados reais podem variar.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLUNA 3: PLANEADOR DE CAMPANHAS -->
+            <div class="modules-column planner-column">
+                 <div class="module" id="planner-main">
+                    <div class="module-header"><div class="header-title"><h3>Planeador de Campanhas</h3></div></div>
+                    <div class="module-content">
+                        <h4>1. Estratégia</h4>
+                        <div class="planner-block"><label>Plataforma</label><select id="plan-platform" class="planner-select"><option>Meta Ads (Instagram/Facebook)</option><option>Google Ads</option><option>TikTok Ads</option></select></div>
+                        <div class="planner-block"><label>Objetivo</label><select id="plan-objective" class="planner-select"><option>Gerar Leads (Contactos)</option><option>Vendas Online</option><option>Reconhecimento de Marca</option></select></div>
+                        <h4>2. Criativo</h4>
+                        <div class="planner-block">
+                            <label>Título (Promessa)</label>
+                            <div class="planner-input" id="plan-title" contenteditable="true">Ganhe 10h por semana.</div>
+                            <div class="gemini-btn-block"><button class="gemini-btn" data-target="plan-title" data-type="título">✨ Gerar</button></div>
+                        </div>
+                        <div class="planner-block">
+                            <label>Descrição (Solução)</label>
+                            <div id="plan-description" class="planner-input" contenteditable="true" style="min-height: 80px;">A nossa ferramenta integra as suas folhas de cálculo e emails, automatizando relatórios.</div>
+                             <div class="gemini-btn-block" style="top: 38px;"><button class="gemini-btn" data-target="plan-description" data-type="descrição">✨ Gerar</button></div>
+                        </div>
+                         <div id="suggestion-box" style="margin-top:15px;"></div>
+                        <h4>3. Enviar Simulação</h4>
+                        <div style="display: flex; gap: 15px; margin-top: 15px;">
+                            <button id="send-whatsapp" class="form-btn whatsapp">WhatsApp</button>
+                            <button id="send-email" class="form-btn email">Email</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- Função de Chamada da API Gemini ---
+            async function callGemini(prompt, isJson = false) {
+                const apiKey = ""; // A Chave de API é gerida pelo ambiente
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                
+                let payload = {
+                    contents: [{ role: "user", parts: [{ text: prompt }] }]
+                };
+
+                if (isJson) {
+                    payload.generationConfig = { responseMimeType: "application/json" };
+                }
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) throw new Error(`Falha na chamada da API: ${response.status}`);
+                    const result = await response.json();
+                    if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts[0]) {
+                        return result.candidates[0].content.parts[0].text;
+                    } else {
+                        throw new Error("Estrutura de resposta inválida da API.");
+                    }
+                } catch (error) {
+                    console.error("Erro ao chamar a API Gemini:", error);
+                    return null;
+                }
+            }
+
+            // --- Gerador de Persona com IA ---
+            const generatePersonaBtn = document.getElementById('generate-persona-btn');
+            const businessDescInput = document.getElementById('business-desc');
+            const personaOutputDiv = document.getElementById('persona-output');
+
+            if (generatePersonaBtn) {
+                generatePersonaBtn.addEventListener('click', async () => {
+                    const businessDesc = businessDescInput.value;
+                    if (!businessDesc.trim()) {
+                        alert("Por favor, descreva o seu negócio.");
+                        return;
+                    }
+
+                    const originalBtnContent = generatePersonaBtn.innerHTML;
+                    generatePersonaBtn.innerHTML = '<div class="loading-spinner"></div> A gerar...';
+                    generatePersonaBtn.disabled = true;
+                    
+                    const prompt = `Baseado na seguinte descrição de negócio: "${businessDesc}", crie um perfil de persona de cliente ideal para o Brasil. Responda APENAS com um objeto JSON com as seguintes chaves: "nome" (string), "idade" (number), "profissao" (string), "localizacao" (string, ex: "São Paulo, SP"), "dores" (array de 3 strings), e "objetivos" (array de 3 strings).`;
+
+                    try {
+                        const resultText = await callGemini(prompt, true);
+                        if (!resultText) throw new Error("A chamada da API retornou nulo");
+                        const persona = JSON.parse(resultText);
+
+                        personaOutputDiv.style.display = 'block';
+                        personaOutputDiv.innerHTML = `
+                            <h4>Perfil da Persona Gerada:</h4>
+                            <p><strong>Nome:</strong> ${persona.nome}</p>
+                            <p><strong>Idade:</strong> ${persona.idade} anos</p>
+                            <p><strong>Profissão:</strong> ${persona.profissao}</p>
+                            <p><strong>Localização:</strong> ${persona.localizacao}</p>
+                            <p><strong>Dores:</strong></p>
+                            <ul>${persona.dores.map(d => `<li>${d}</li>`).join('')}</ul>
+                            <p><strong>Objetivos:</strong></p>
+                            <ul>${persona.objetivos.map(o => `<li>${o}</li>`).join('')}</ul>
+                        `;
+                    } catch (e) {
+                        personaOutputDiv.innerHTML = `<p style="color:var(--color-erros);">Ocorreu um erro ao gerar a persona. Tente novamente.</p>`;
+                        personaOutputDiv.style.display = 'block';
+                    } finally {
+                         generatePersonaBtn.innerHTML = originalBtnContent;
+                         generatePersonaBtn.disabled = false;
+                    }
+                });
+            }
+
+            // --- Assistente de Criativos com IA ---
+            document.querySelectorAll('.gemini-btn[data-target]').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const targetId = btn.dataset.target;
+                    const type = btn.dataset.type; 
+                    const targetEl = document.getElementById(targetId);
+                    const suggestionBox = document.getElementById('suggestion-box');
+                    
+                    const objective = document.getElementById('plan-objective').value;
+                    const businessInfo = document.getElementById('business-desc').value || "um negócio inovador";
+
+                    if (!businessInfo.trim()) {
+                         alert("Descreva o seu negócio no 'Gerador de Persona com IA' primeiro para melhores resultados.");
+                         return;
+                    }
+
+                    const originalBtnContent = btn.innerHTML;
+                    btn.innerHTML = '<div class="loading-spinner"></div>';
+                    btn.disabled = true;
+
+                    const prompt = `Para uma campanha com o objetivo de "${objective}" sobre "${businessInfo}", gere 5 opções de ${type} para um anúncio. Seja criativo, direto e persuasivo. Responda APENAS com um objeto JSON com uma chave chamada "sugestoes" que contém um array de 5 strings.`;
+
+                    try {
+                        const resultText = await callGemini(prompt, true);
+                        if (!resultText) throw new Error("A chamada da API retornou nulo");
+                        const suggestions = JSON.parse(resultText).sugestoes;
+                        
+                        suggestionBox.innerHTML = `<h4>✨ Sugestões da IA para ${type}:</h4>`;
+                        const list = document.createElement('ul');
+                        list.style.listStyle = 'none';
+                        list.style.paddingLeft = '0';
+
+                        suggestions.forEach(sug => {
+                            const li = document.createElement('li');
+                            li.textContent = `"${sug}"`;
+                            li.style.padding = '8px';
+                            li.style.margin = '5px 0';
+                            li.style.background = '#f0f2f5';
+                            li.style.borderRadius = '6px';
+                            li.style.cursor = 'pointer';
+                            li.addEventListener('click', () => {
+                                targetEl.innerText = sug;
+                                suggestionBox.innerHTML = '';
+                            });
+                            list.appendChild(li);
+                        });
+                        suggestionBox.appendChild(list);
+                    } catch(e) {
+                         suggestionBox.innerHTML = `<p style="color:var(--color-erros);">Ocorreu um erro ao gerar sugestões. Tente novamente.</p>`;
+                    } finally {
+                        btn.innerHTML = originalBtnContent;
+                        btn.disabled = false;
+                    }
+                });
+            });
+            
+            // --- Lógica Existente ---
+            document.querySelectorAll('.module-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    const module = header.parentElement;
+                    if (module.id === 'planner-main' || module.id === 'mod-dashboard') return;
+                    module.classList.toggle('collapsed');
+                });
+            });
+            document.querySelectorAll('.modules-column .module, .tools-column .module').forEach(m => {
+                 if (m.id !== 'mod-dashboard' && m.id !== 'planner-main' && m.id !== 'mod-gemini' ) {
+                   m.classList.add('collapsed');
+                 }
+            });
+            
+            const getEbookBtn = document.getElementById('get-ebook');
+            if(getEbookBtn){
+              getEbookBtn.addEventListener('click', () => {
+                  const emailInput = document.getElementById('ebook-email');
+                  const email = emailInput.value || emailInput.innerText;
+                  if(email && email.includes('@')) {
+                      alert(`Obrigado! O seu ebook foi enviado para ${email}.`);
+                  } else {
+                      alert('Por favor, insira um email válido.');
+                  }
+              });
+            }
+
+            // --- Lógica da Calculadora ---
+            const platformMetrics = { 
+                meta: { CPM: 25.00, CTR: 0.015, CVR: 0.02 }, 
+                google: { CPM: 40.00, CTR: 0.03, CVR: 0.035 }, 
+                tiktok: { CPM: 15.00, CTR: 0.01, CVR: 0.015 } 
+            };
+            let currentPlatform = 'meta';
+            const investmentSlider = document.getElementById('investment');
+            const kpiInvestment = document.getElementById('kpi-investment');
+            const kpiLeads = document.getElementById('kpi-leads');
+            const kpiCpl = document.getElementById('kpi-cpl');
+            const tabs = document.querySelectorAll('.calc-tab');
+            
+            function calculateAndUpdateDashboard() {
+                if (!investmentSlider) return;
+                const investment = parseFloat(investmentSlider.value);
+                const { CPM, CTR, CVR } = platformMetrics[currentPlatform];
+                const leads = (((investment / CPM) * 1000) * CTR) * CVR;
+                const cpl = leads > 0 ? investment / leads : 0;
+                
+                kpiInvestment.textContent = `R$ ${(investment * 30).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                kpiLeads.textContent = Math.round(leads * 30).toLocaleString('pt-BR');
+                kpiCpl.textContent = `R$ ${cpl.toFixed(2)}`;
+            }
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    currentPlatform = tab.dataset.platform;
+                    calculateAndUpdateDashboard();
+                });
+            });
+
+            if(investmentSlider) {
+              investmentSlider.addEventListener('input', calculateAndUpdateDashboard);
+              calculateAndUpdateDashboard();
+            }
+
+            // --- Enviar Simulação ---
+            const btnWhatsapp = document.getElementById('send-whatsapp');
+            const btnEmail = document.getElementById('send-email');
+            
+            function generateSimulationSummary() {
+                let summary = `📄 *Plano de Campanha - joaolucaswebsite*\n\n`;
+                summary += `*Plataforma:* ${document.getElementById('plan-platform')?.value || '[N/D]'}\n`;
+                summary += `*Objetivo:* ${document.getElementById('plan-objective')?.value || '[N/D]'}\n\n`;
+                summary += `✍️ *CRIATIVO DO ANÚNCIO*\n`;
+                summary += `*Título:* ${document.getElementById('plan-title')?.innerText || '[N/D]'}\n`;
+                summary += `*Descrição:* ${document.getElementById('plan-description')?.innerText || '[N/D]'}\n\n`;
+                summary += `📈 *PROJEÇÃO DO DASHBOARD*\n`;
+                summary += `*Investimento Mensal:* ${kpiInvestment.textContent}\n`;
+                summary += `*Leads Mensais Estimados:* ${kpiLeads.textContent}\n`;
+                summary += `*CPL Estimado:* ${kpiCpl.textContent}\n`;
+                return summary;
+            }
+            
+            if(btnWhatsapp){
+              btnWhatsapp.addEventListener('click', () => {
+                  const whatsappNumber = '5531992088295';
+                  const message = generateSimulationSummary();
+                  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+                  window.open(whatsappUrl, '_blank');
+              });
+            }
+
+            if(btnEmail){
+              btnEmail.addEventListener('click', () => {
+                  const emailTo = ''; 
+                  const subject = `Plano de Campanha - Central de IA`;
+                  const body = generateSimulationSummary().replace(/\*/g, '');
+                  const emailUrl = `mailto:${emailTo}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                  window.location.href = emailUrl;
+              });
+            }
+
+        });
+    </script>
+</body>
+</html>
